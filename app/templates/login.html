@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaders.st Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <h2 class="login-title">Welcome Back</h2>
+
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+
+        <!-- Email -->
+        <div class="form-group">
+            <input type="email" name="email" id="email" required>
+            <label for="email" class="floating-label">Email</label>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+            <input type="password" name="password" id="password" required>
+            <label for="password" class="floating-label">Password</label>
+
+            <span class="show-pass" onclick="togglePass()">👁</span>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+
+    </form>
+
+    <div class="sub-links">
+        <a href="/forgot-password">Forgot Password?</a>
+    </div>
+
+</div>
+
+<script>
+function togglePass() {
+    const p = document.getElementById("password");
+    p.type = p.type === "password" ? "text" : "password";
+}
+</script>
+
+</body>
+</html>

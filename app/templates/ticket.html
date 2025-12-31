@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket Details</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Status badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+        }
+        .open { background:#fbbf24; color:#1e1e1e; }
+        .progress { background:#3b82f6; }
+        .resolved { background:#22c55e; }
+
+        /* Priority badges */
+        .priority-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+        }
+        .high { background:#ef4444; }
+        .medium { background:#f59e0b; }
+        .low { background:#10b981; }
+
+        .ticket-box {
+            background:#1e293b;
+            padding:25px;
+            max-width:700px;
+            margin:25px auto;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,0.4);
+        }
+        .label {
+            font-weight:bold;
+            color:#93c5fd;
+            display:block;
+            margin-bottom:6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">Ticket Details</div>
+
+<div class="ticket-box">
+
+    <h2 style="color:#93c5fd;">{{ ticket[1] }}</h2>
+
+    <p><b>Email:</b> {{ ticket[2] }}</p>
+
+    <p><b>Description:</b><br>{{ ticket[3] }}</p>
+
+    <!-- Current Status & Priority Badges -->
+    <p>
+        <b>Current Status:</b>
+        {% if ticket[4] == "Open" %}
+            <span class="status-badge open">OPEN</span>
+        {% elif ticket[4] == "In Progress" %}
+            <span class="status-badge progress">IN PROGRESS</span>
+        {% else %}
+            <span class="status-badge resolved">RESOLVED</span>
+        {% endif %}
+    </p>
+
+    <p>
+        <b>Priority:</b>
+        {% if ticket[5] == "High" %}
+            <span class="priority-badge high">HIGH</span>
+        {% elif ticket[5] == "Medium" %}
+            <span class="priority-badge medium">MEDIUM</span>
+        {% else %}
+            <span class="priority-badge low">LOW</span>
+        {% endif %}
+    </p>
+
+    <hr style="border-color:#334155; margin:20px 0;">
+
+    <!-- UPDATE FORM -->
+    <form method="post">
+
+        <!-- =========================
+            UPDATE STATUS
+        ========================== -->
+        <label class="label">Update Status</label>
+        <select name="status">
+            <option value="Open" {% if ticket.status == "Open" %}selected{% endif %}>Open</option>
+            <option value="In Progress" {% if ticket.status == "In Progress" %}selected{% endif %}>In Progress</option>
+            <option value="Resolved" {% if ticket.status == "Resolved" %}selected{% endif %}>Resolved</option>
+        </select>
+
+        <!-- =========================
+            UPDATE PRIORITY
+        ========================== -->
+        
+        {% if current_user.role == "admin" %}
+        
+        <label class="label">Update Priority</label>
+        <select name="priority">
+            <option value="High" {% if ticket[5] == "High" %}selected{% endif %}>High</option>
+            <option value="Medium" {% if ticket[5] == "Medium" %}selected{% endif %}>Medium</option>
+            <option value="Low" {% if ticket[5] == "Low" %}selected{% endif %}>Low</option>
+        </select>
+
+        <!-- =========================
+            ASSIGN AGENT (ADMIN ONLY)
+        ========================== -->
+
+        <label class="label">Assign Agent</label>
+        <select name="assigned_to">
+            <option value="">Unassigned</option>
+            {% for agent in agents %}
+                <option value="{{ agent.id }}"
+                    {% if ticket.assigned_to == agent.id %}selected{% endif %}>
+                    {{ agent.email }}
+                </option>
+            {% endfor %}
+        </select>
+
+        {% endif %}
+
+        <!-- =========================
+            SUBMIT
+        ========================== -->
+        <button type="submit">Save Changes</button>
+
+    </form>
+
+    <br><br>
+
+    <a href="/" class="ticket-link">← Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

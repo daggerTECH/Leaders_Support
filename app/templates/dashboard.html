@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaders Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<!-- NAVIGATION -->
+<div class="nav">
+    <div class="nav-title">Ticket Dashboard</div>
+
+    <div class="nav-links">
+        {% if current_user.role == "admin" %}
+            <a href="/user/create">+ Create User</a>
+        {% endif %}
+
+        <!-- 🔔 Notification Bell -->
+        <div class="notification-wrapper">
+            <button id="notifBtn" class="notif-btn" aria-label="Notifications">
+                🔔
+                <span id="notifCount" class="notif-badge hidden">0</span>
+            </button>
+
+            <div id="notifDropdown" class="notif-dropdown hidden">
+                <div class="notif-header">Notifications</div>
+
+                <ul id="notifList" class="notif-list">
+                    <li class="notif-empty">No new notifications</li>
+                </ul>
+
+                <div class="notif-footer">
+                    <button id="markReadBtn" class="mark-read-btn" onclick="markAllRead()" disabled>
+                        ✔ Mark all as read
+                    </button>
+
+                    <button id="viewAllBtn" class="view-all-btn" onclick="loadAllNotifications()" disabled>
+                        👁 View all
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+
+        <a href="/" class="kpi-card clickable {% if filter_status == 'resolved' %}active{% endif %}">
+            <h3>Total Tickets</h3>
+            <p class="kpi-number">{{ total }}</p>
+        </a>
+
+        <a href="/?filter=unresolved" class="kpi-card clickable">
+            <h3>Unresolved</h3>
+            <p class="kpi-number">{{ unresolved }}</p>
+        </a>
+
+        <a href="/?filter=resolved" class="kpi-card clickable">
+            <h3>Resolved</h3>
+            <p class="kpi-number">{{ resolved }}</p>
+        </a>
+
+        <a href="/?filter=overdue" class="kpi-card clickable">
+            <h3>Overdue</h3>
+            <p class="kpi-number">{{ overdue }}</p>
+        </a>
+
+    </div>
+
+    <!-- ============================
+         SEARCH + FILTER BAR
+    =============================== -->
+    <div class="filter-bar">
+        <form method="GET" action="/" class="filter-form">
+            <input type="text" name="search" class="filter-search"
+                placeholder="Search by ticket code, email, or description..."
+                value="{{ search }}">
+
+            <select name="filter" class="filter-select">
+                <option value="">All</option>
+                <option value="unresolved" {% if filter_status == "unresolved" %}selected{% endif %}>Unresolved</option>
+                <option value="resolved" {% if filter_status == "resolved" %}selected{% endif %}>Resolved</option>
+                <option value="overdue" {% if filter_status == "overdue" %}selected{% endif %}>Overdue</option>
+            </select>
+
+            {% if current_user.role == "agent" %}
+                <input type="hidden" name="my" value="1">
+            {% endif %}
+
+            <button class="btn" style="width:auto; padding:10px 20px;">Apply</button>
+        </form>
+    </div>
+
+    <!-- ============================
+         SEARCH RESULT MESSAGE
+    =============================== -->
+    {% if tickets|length == 0 %}
+        <p class="no-results">No tickets found based on your search or filter.</p>
+    {% else %}
+        <p class="result-count">{{ tickets|length }} ticket(s) found.</p>
+    {% endif %}
+
+    <!-- ============================
+         CHARTS
+    =============================== -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3 style="color:#93c5fd; margin-bottom:10px;">Ticket Status</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3 style="color:#93c5fd; margin-bottom:10px;">Ticket Priorities</h3>
+            <canvas id="priorityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- ============================
+         TABLE SECTION
+    =============================== -->
+    <div class="table-section">
+        <h2>All Tickets</h2>
+
+        {% if tickets|length > 0 %}
+        <table>
+            <tr>
+                <th>SLA</th>
+                <th>Code</th>
+                <th>Client Email</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Updated</th>
+                <th>Action</th>
+                <th>Assigned To</th>
+            </tr>
+
+            {% for t in tickets %}
+            <tr>
+
+                <!-- SLA -->
+                <td>
+                    {% if t.status == "Resolved" %}
+                        <span class="sla-badge resolved">Done</span>
+
+                    {% else %}
+                        <span class="sla-badge active"
+                            data-elapsed="{{ t.elapsed_hours }}"
+                            data-sla="{{ t.sla_hours }}">
+                            <span class="sla-time"></span>
+                        </span>
+                    {% endif %}
+                </td>
+
+                <!-- Ticket Code -->
+                <td>{{ t.ticket_code }}</td>
+
+                <!-- Client Email -->
+                <td>{{ t.email }}</td>
+
+                <!-- Description -->
+                <td>
+                    {{ t.description[:60] }}
+                    {% if t.description|length > 60 %}...{% endif %}
+                </td>
+
+                <!-- Status -->
+                <td>
+                    {% if t.status == "Open" %}
+                        <span class="status-badge open">OPEN</span>
+                    {% elif t.status == "In Progress" %}
+                        <span class="status-badge progress">IN PROGRESS</span>
+                    {% else %}
+                        <span class="status-badge resolved">RESOLVED</span>
+                    {% endif %}
+                </td>
+
+                <!-- Priority -->
+                <td>
+                    {% if t.priority == "High" %}
+                        <span class="priority-badge high">HIGH</span>
+                    {% elif t.priority == "Medium" %}
+                        <span class="priority-badge medium">MEDIUM</span>
+                    {% else %}
+                        <span class="priority-badge low">LOW</span>
+                    {% endif %}
+                </td>
+
+                <!-- Updated -->
+                <td>{{ t.updated_at }}</td>
+
+                <!-- Action -->
+                <td>
+                    <a class="ticket-link" href="/ticket/{{ t.id }}">View</a>
+                </td>
+
+                <!-- Assigned Agent -->
+                <td>
+                    {% if t.agent_email %}
+                        <div class="agent-info">
+                            <div class="agent-avatar">
+                                {{ t.agent_email[0:2]|upper }}
+                            </div>
+                            <span class="agent-email">{{ t.agent_email }}</span>
+                        </div>
+                    {% else %}
+                        <span class="agent-unassigned">Unassigned</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ============================
+     CHARTS SCRIPT
+=============================== -->
+<script>
+const unresolved = Number("{{ unresolved or 0 }}");
+const resolved   = Number("{{ resolved or 0 }}");
+const overdue    = Number("{{ overdue or 0 }}");
+const activeUnresolved = Math.max(unresolved - overdue, 0);
+const high       = Number("{{ high or 0 }}");
+const medium     = Number("{{ medium or 0 }}");
+const low        = Number("{{ low or 0 }}");
+
+/* STATUS CHART */
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Unresolved', 'Resolved'],
+        datasets: [{
+            data: [unresolved, resolved],
+            backgroundColor: ['#fbbf24', '#22c55e'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,   // ✅ FORCE CIRCLE
+        aspectRatio: 1,              // ✅ 1:1 ratio (perfect circle)
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#e5e7eb',
+                    padding: 16,
+                    font: { size: 12 }
+                }
+            }
+        }
+    }
+});
+
+/* PRIORITY CHART */
+new Chart(document.getElementById('priorityChart'), {
+    type: 'bar',
+    data: {
+        labels: ['High', 'Medium', 'Low'],
+        datasets: [{
+            label: 'Tickets',
+            data: [high, medium, low],
+            backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+        }]
+    },
+    options: {
+        scales: {
+            x: { ticks: { color: '#e5e7eb' }},
+            y: { ticks: { color: '#e5e7eb' }}
+        },
+        plugins: { legend: { display: false }}
+    }
+});
+
+document.querySelectorAll('.sla-badge.active').forEach(badge => {
+    const elapsed = Number(badge.dataset.elapsed);
+    const sla = Number(badge.dataset.sla);
+
+    const remaining = sla - elapsed;
+    const timeEl = badge.querySelector('.sla-time');
+
+    if (remaining <= 0) {
+        badge.classList.remove('active');
+        badge.classList.add('overdue');
+        timeEl.textContent = `Overdue ${Math.abs(remaining)}h`;
+        return;
+    }
+
+    timeEl.textContent = `${remaining}h left`;
+
+    // Warning when <= 20% remaining
+    if (remaining <= sla * 0.2) {
+        badge.classList.add('warning');
+    }
+});
+
+const notifBtn = document.getElementById("notifBtn");
+const notifDropdown = document.getElementById("notifDropdown");
+const notifCount = document.getElementById("notifCount");
+const notifList = document.getElementById("notifList");
+const markReadBtn = document.getElementById("markReadBtn");
+const viewAllBtn = document.getElementById("viewAllBtn");
+
+/* Toggle dropdown */
+notifBtn.addEventListener("click", () => {
+    notifDropdown.classList.toggle("hidden");
+});
+
+/* ============================
+   FETCH UNREAD NOTIFICATIONS
+============================ */
+async function fetchNotifications() {
+    const res = await fetch("/notifications/unread");
+    const data = await res.json();
+
+    notifList.innerHTML = "";
+
+    // ✅ View All should ALWAYS be enabled
+    viewAllBtn.disabled = false;
+
+    if (data.count > 0) {
+        notifCount.textContent = data.count;
+        notifCount.classList.remove("hidden");
+
+        // ✅ Enable mark-all-read only when unread exists
+        markReadBtn.disabled = false;
+
+        data.notifications.forEach(n => {
+            const li = document.createElement("li");
+            li.className = "notification-item unread";
+
+            li.innerHTML = `
+                <a href="/ticket/${n.ticket_id}"
+                   onclick="markNotificationRead(${n.id})">
+                    <strong>${n.ticket_code}</strong><br>
+                    ${n.message}
+                    <small>${n.created_at}</small>
+                </a>
+            `;
+
+            notifList.appendChild(li);
+        });
+    } else {
+        notifCount.classList.add("hidden");
+
+        // ❌ Disable only Mark All Read
+        markReadBtn.disabled = true;
+
+        notifList.innerHTML = `<li class="notif-empty">No new notifications</li>`;
+    }
+}
+
+/* ============================
+   MARK SINGLE AS READ
+============================ */
+async function markNotificationRead(notificationId) {
+    await fetch(`/notifications/mark-read/${notificationId}`, {
+        method: "POST"
+    });
+
+    fetchNotifications();
+}
+
+/* ============================
+   LOAD ALL (READ + UNREAD)
+============================ */
+async function loadAllNotifications() {
+    const res = await fetch("/notifications/all");
+    const data = await res.json();
+
+    notifList.innerHTML = "";
+
+    // View All stays enabled
+    viewAllBtn.disabled = false;
+
+    if (data.notifications.length === 0) {
+        notifList.innerHTML = `<li class="notif-empty">No notifications</li>`;
+        markReadBtn.disabled = true;
+        return;
+    }
+
+    markReadBtn.disabled = false;
+
+    data.notifications.forEach(n => {
+        const li = document.createElement("li");
+        li.className = `notification-item ${n.is_read ? "read" : "unread"}`;
+
+        li.innerHTML = `
+            <a href="/ticket/${n.ticket_id}"
+               onclick="markNotificationRead(${n.id})">
+                <strong>${n.ticket_code}</strong><br>
+                ${n.message}
+                <small>${n.created_at}</small>
+            </a>
+        `;
+
+        notifList.appendChild(li);
+    });
+}
+
+/* ============================
+   MARK ALL AS READ
+============================ */
+async function markAllRead() {
+    if (markReadBtn.disabled) return;
+
+    await fetch("/notifications/mark-read", { method: "POST" });
+    fetchNotifications();
+}
+
+/* ============================
+   AUTO REFRESH
+============================ */
+fetchNotifications();
+setInterval(fetchNotifications, 10000);
+</script>
+
+</body>
+</html>

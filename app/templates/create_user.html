@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="user-create-container">
+    <div class="user-create-card">
+
+        <h2>Create New User</h2>
+
+        {% if error %}
+            <div class="form-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="user-create-form">
+            <input type="email" name="email" placeholder="User Email" required>
+
+            <input type="password" name="password" placeholder="Temporary Password" required>
+
+            <select name="role" required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="agent">Agent</option>
+            </select>
+
+            <button type="submit">Create User</button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
