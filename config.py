@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    SECRET_KEY = "leaders_secret"
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
     # Gmail SMTP
     MAIL_SERVER = "smtp.gmail.com"
@@ -13,7 +13,7 @@ class Config:
     MAIL_PASSWORD = "wsut sfvc ctja yofz"
 
     # SQLAlchemy Database
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # SLACK NOTIFIER
