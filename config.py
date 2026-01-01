@@ -13,7 +13,7 @@ class Config:
     EMAIL_PASSWORD = "mwwe grms mazj yqeg"
 
     # SQLAlchemy Database
-    DATABASE_URL = os.getenv("DATABASE_URL")
+    DATABASE_URL = os.getenv("mysql://root:yxpVkOzJCBXpybNYXFdmQXPvULefozpd@mysql.railway.internal:3306/railway")
 
     if DATABASE_URL and DATABASE_URL.startswith("mysql://"):
         DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
@@ -26,6 +26,7 @@ class Config:
 
     # SLACK NOTIFIER
     SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+
 
 
 
