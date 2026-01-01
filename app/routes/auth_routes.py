@@ -74,7 +74,7 @@ def logout():
 # ============================
 def send_verification_email(email):
     token = ts.dumps(email, salt="email-verify")
-    verify_url = f"http://localhost:5000/verify/{token}"
+    verify_url = f"https://leasders-support.onrender.com/verify/{token}"
 
     msg = Message(
         subject="Verify Your Leaders.st Account",
@@ -124,7 +124,7 @@ def forgot_password():
                                    error="Email not found")
 
         token = ts.dumps(email, salt="reset-password")
-        reset_url = f"http://localhost:5000/reset-password/{token}"
+        reset_url = f"https://leasders-support.onrender.com/reset-password/{token}"
 
         msg = Message(
             subject="Reset Your Leaders.st Password",
@@ -165,3 +165,4 @@ def reset_password(token):
         return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html")
+
