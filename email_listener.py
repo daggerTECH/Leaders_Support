@@ -6,6 +6,7 @@ from app import create_app
 import socket
 import re
 import time
+from app.utils.notifier import notify_user
 
 
 # ============================================================
@@ -119,7 +120,7 @@ def create_ticket(session, sender, subject, body, message_id):
         ticket_code = f"TCK-{ticket_id:05d}"
 
         # ----------------------------
-        # Update ticket_code safely
+        # Update ticket_code
         # ----------------------------
         session.execute(
             text("""
@@ -129,6 +130,22 @@ def create_ticket(session, sender, subject, body, message_id):
             """),
             {"code": ticket_code, "id": ticket_id}
         )
+
+        # ----------------------------
+        # 🔔 NOTIFY ALL ADMINS
+        # ----------------------------
+        admins = session.execute(
+            text("SELECT id FROM users WHERE role = 'admin'")
+        ).fetchall()
+
+        for admin in admins:
+            notify_user(
+                session,
+                admin.id,
+                ticket_id,
+                ticket_code,
+                f"New ticket created: {ticket_code}"
+            )
 
         session.commit()
 
@@ -318,3 +335,4 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
