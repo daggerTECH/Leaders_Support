@@ -6,6 +6,7 @@ from flask_login import current_user
 from app.utils.slack_notifier import notify_user
 import os
 from werkzeug.utils import secure_filename
+from app.utils.files import allowed_file
 
 ticket_bp = Blueprint("ticket", __name__)
 
@@ -404,4 +405,5 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
 
