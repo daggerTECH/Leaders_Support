@@ -133,9 +133,34 @@
 
     <br><br>
 
+    <div class="ticket-notes">
+        <h3>📝 Ticket Notes</h3>
+    
+        {% if notes %}
+            {% for n in notes %}
+            <div class="note-item">
+                <div class="note-header">
+                    <strong>{{ n.email }}</strong>
+                    <span class="note-role">{{ n.role|upper }}</span>
+                    <small>{{ n.created_at }}</small>
+                </div>
+                <p>{{ n.note }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-notes">No notes yet.</p>
+        {% endif %}
+    
+        <form method="POST" class="note-form">
+            <textarea name="note" required placeholder="Write a note..."></textarea>
+            <button type="submit">Add Note</button>
+        </form>
+    </div>
+
     <a href="/" class="ticket-link">← Back to Dashboard</a>
 
 </div>
 
 </body>
 </html>
+
