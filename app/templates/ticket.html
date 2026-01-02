@@ -139,7 +139,7 @@
                             <div class="note-images">
                                 {% for img in images_by_note[n.id] %}
                                     <img 
-                                        src="{{ url_for('static', filename=img) }}"
+                                        src="{{ url_for('static', filename=n.image_path) }}"
                                         class="note-image"
                                         loading="lazy"
                                     >
@@ -164,6 +164,7 @@
 
 </body>
 </html>
+
 
 
 
