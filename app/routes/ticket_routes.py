@@ -241,6 +241,7 @@ def view_ticket(id):
                 # 2️⃣ Absolute path where files are SAVED
                 upload_dir = os.path.join(
                     current_app.root_path,
+                    "app"
                     "static",
                     "uploads",
                     "tickets",
@@ -411,6 +412,7 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
 
 
 
