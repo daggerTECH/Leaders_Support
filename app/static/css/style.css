@@ -270,6 +270,44 @@ tr:hover td {
 }
 
 /* ===============================
+   TICKET NOTES
+   =============================== */
+.ticket-notes {
+    margin-top: 30px;
+}
+
+.note-item {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.note-role {
+    margin-left: 8px;
+    color: #38bdf8;
+}
+
+.note-form textarea {
+    width: 100%;
+    min-height: 80px;
+    margin-top: 10px;
+    padding: 8px;
+}
+
+.note-form button {
+    margin-top: 8px;
+}
+
+/* ===============================
    STATUS BADGES (FIXED)
 =============================== */
 
@@ -1061,4 +1099,5 @@ tr:hover td {
 
 .view-all-btn:hover {
     background: #0f766e;
+
 }
