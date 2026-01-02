@@ -28,18 +28,10 @@ def create_user():
         password = request.form["password"]
         role = request.form["role"]
 
-        if not email or not password or not role:
-            return render_template(
-                "create_user.html",
-                error="All fields are required."
-            )
-
         hashed = generate_password_hash(password)
         session = current_app.session()
 
-        # -------------------------
-        # CHECK IF EMAIL EXISTS
-        # -------------------------
+        # Check duplicate email
         existing = session.execute(
             text("SELECT id FROM users WHERE email = :email"),
             {"email": email}
@@ -52,64 +44,43 @@ def create_user():
                 error="A user with this email already exists."
             )
 
-        # -------------------------
-        # INSERT USER
-        # -------------------------
+        session.execute(
+            text("""
+                INSERT INTO users (email, password, role, is_verified)
+                VALUES (:email, :password, :role, 0)
+            """),
+            {
+                "email": email,
+                "password": hashed,
+                "role": role
+            }
+        )
+        session.commit()
+        session.close()
+
+        # ✅ CREATE SERIALIZER INSIDE CONTEXT
+        serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        token = serializer.dumps(email, salt="email-verify")
+
+        verify_url = url_for(
+            "auth.verify_email",
+            token=token,
+            _external=True
+        )
+
         try:
-            session.execute(
-                text("""
-                    INSERT INTO users (email, password, role, is_verified)
-                    VALUES (:email, :password, :role, 0)
-                """),
-                {
-                    "email": email,
-                    "password": hashed,
-                    "role": role
-                }
-            )
-            session.commit()
-
-        except IntegrityError:
-            session.rollback()
-            session.close()
-            return render_template(
-                "create_user.html",
-                error="A user with this email already exists."
-            )
-
-        finally:
-            session.close()
-
-        # -------------------------
-        # SEND VERIFICATION EMAIL
-        # -------------------------
-        try:
-            token = ts.dumps(email, salt="email-verify")
-
-            verify_url = url_for(
-                "auth.verify_email",
-                token=token,
-                _external=True
-            )
-
             msg = Message(
                 subject="Verify Your Leaders.st Account",
                 sender=current_app.config["MAIL_USERNAME"],
                 recipients=[email],
                 html=verification_email_html(verify_url)
             )
-
             mail.send(msg)
-            flash("User created successfully. Verification email sent.", "success")
-
         except Exception as e:
-            # Email failure should NOT block account creation
             print("⚠️ Verification email failed:", e)
-            flash(
-                "User created, but verification email could not be sent.",
-                "warning"
-            )
 
         return redirect(url_for("ticket.dashboard"))
 
     return render_template("create_user.html")
+
+
