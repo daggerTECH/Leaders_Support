@@ -67,7 +67,7 @@ def create_user():
 
         try:
             msg = Message(
-                subject="Verify Your Leaders.st Account",
+                subject="Verify Your Leaders Account",
                 sender=current_app.config["MAIL_USERNAME"],
                 recipients=[email],
                 html=verification_email_html(verify_url)
@@ -79,6 +79,7 @@ def create_user():
         return redirect(url_for("ticket.dashboard"))
 
     return render_template("create_user.html")
+
 
 
 
