@@ -222,9 +222,9 @@ def view_ticket(id):
         if "note" in request.form:
             note_text = request.form.get("note", "").strip()
             files = request.files.getlist("images")
-
+        
             if note_text:
-                # Insert note
+                # 1️⃣ Insert note first
                 result = session.execute(
                     text("""
                         INSERT INTO ticket_notes (ticket_id, user_id, note)
@@ -237,38 +237,44 @@ def view_ticket(id):
                     }
                 )
                 note_id = result.lastrowid
-
-                # Save images
-                upload_root = current_app.config.get("UPLOAD_FOLDER", "app/static/uploads")
-                note_folder = os.path.join(
-                    upload_root,
+        
+                # 2️⃣ Absolute path where files are SAVED
+                upload_dir = os.path.join(
+                    current_app.root_path,
+                    "static",
+                    "uploads",
                     "tickets",
                     f"ticket_{id}",
                     f"note_{note_id}"
                 )
-                os.makedirs(note_folder, exist_ok=True)
-
+        
+                os.makedirs(upload_dir, exist_ok=True)
+        
+                # 3️⃣ Relative path stored in DB (NO 'static/')
+                db_path_prefix = f"uploads/tickets/ticket_{id}/note_{note_id}"
+        
                 for file in files:
                     if file and allowed_file(file.filename):
                         filename = secure_filename(file.filename)
-                        filepath = os.path.join(note_folder, filename)
-                        file.save(filepath)
-
+        
+                        file_path = os.path.join(upload_dir, filename)
+                        file.save(file_path)
+        
                         session.execute(
                             text("""
                                 INSERT INTO note_attachments
                                 (note_id, file_path, file_type)
-                                VALUES (:note_id, :path, :type)
+                                VALUES (:note_id, :file_path, :file_type)
                             """),
                             {
                                 "note_id": note_id,
-                                "path": filepath,
-                                "type": file.mimetype
+                                "file_path": f"{db_path_prefix}/{filename}",
+                                "file_type": file.mimetype
                             }
                         )
-
+        
                 session.commit()
-
+        
             session.close()
             return redirect(url_for("ticket.view_ticket", id=id))
 
@@ -405,6 +411,7 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
 
 
 
