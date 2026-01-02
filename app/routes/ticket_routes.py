@@ -251,7 +251,7 @@ def view_ticket(id):
                 os.makedirs(upload_dir, exist_ok=True)
         
                 # 3️⃣ Relative path stored in DB (NO 'static/')
-                db_path_prefix = f"uploads/tickets/ticket_{id}/note_{note_id}"
+                db_path_prefix = f"static/uploads/tickets/ticket_{id}/note_{note_id}"
         
                 for file in files:
                     if file and allowed_file(file.filename):
@@ -411,6 +411,7 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
 
 
 
