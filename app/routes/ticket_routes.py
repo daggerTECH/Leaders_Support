@@ -239,7 +239,7 @@ def view_ticket(id):
                 note_id = result.lastrowid
 
                 # Save images
-                upload_root = current_app.config.get("UPLOAD_FOLDER", "uploads")
+                upload_root = current_app.config.get("UPLOAD_FOLDER", "static/uploads")
                 note_folder = os.path.join(
                     upload_root,
                     "tickets",
@@ -405,6 +405,7 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
 
 
 
