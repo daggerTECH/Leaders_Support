@@ -391,6 +391,27 @@ button {
     text-decoration: none;
 }
 
+/* =========================
+   IMAGES
+========================= */
+.note-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.note-image {
+    max-width: 120px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.note-image:hover {
+    transform: scale(1.05);
+}
+
 /* ===============================
    STATUS BADGES (FIXED)
 =============================== */
@@ -1185,4 +1206,5 @@ button {
     background: #0f766e;
 
 }
+
 
