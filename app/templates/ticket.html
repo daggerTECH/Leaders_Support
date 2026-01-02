@@ -48,119 +48,107 @@
 
 <div class="header">Ticket Details</div>
 
-<div class="ticket-box">
+<div class="ticket-layout">
 
-    <h2 style="color:#93c5fd;">{{ ticket[1] }}</h2>
+    <!-- ================= LEFT: TICKET INFO ================= -->
+    <div class="ticket-left">
 
-    <p><b>Email:</b> {{ ticket[2] }}</p>
+        <h2 style="color:#93c5fd;">{{ ticket.ticket_code }}</h2>
 
-    <p><b>Description:</b><br>{{ ticket[3] }}</p>
+        <p><b>Email:</b> {{ ticket.email }}</p>
+        <p><b>Description:</b><br>{{ ticket.description }}</p>
 
-    <!-- Current Status & Priority Badges -->
-    <p>
-        <b>Current Status:</b>
-        {% if ticket[4] == "Open" %}
-            <span class="status-badge open">OPEN</span>
-        {% elif ticket[4] == "In Progress" %}
-            <span class="status-badge progress">IN PROGRESS</span>
-        {% else %}
-            <span class="status-badge resolved">RESOLVED</span>
-        {% endif %}
-    </p>
+        <p>
+            <b>Status:</b>
+            {% if ticket.status == "Open" %}
+                <span class="status-badge open">OPEN</span>
+            {% elif ticket.status == "In Progress" %}
+                <span class="status-badge progress">IN PROGRESS</span>
+            {% else %}
+                <span class="status-badge resolved">RESOLVED</span>
+            {% endif %}
+        </p>
 
-    <p>
-        <b>Priority:</b>
-        {% if ticket[5] == "High" %}
-            <span class="priority-badge high">HIGH</span>
-        {% elif ticket[5] == "Medium" %}
-            <span class="priority-badge medium">MEDIUM</span>
-        {% else %}
-            <span class="priority-badge low">LOW</span>
-        {% endif %}
-    </p>
+        <p>
+            <b>Priority:</b>
+            {% if ticket.priority == "High" %}
+                <span class="priority-badge high">HIGH</span>
+            {% elif ticket.priority == "Medium" %}
+                <span class="priority-badge medium">MEDIUM</span>
+            {% else %}
+                <span class="priority-badge low">LOW</span>
+            {% endif %}
+        </p>
 
-    <hr style="border-color:#334155; margin:20px 0;">
+        <hr style="border-color:#334155; margin:20px 0;">
 
-    <!-- UPDATE FORM -->
-    <form method="post">
+        <!-- UPDATE FORM -->
+        <form method="post">
 
-        <!-- =========================
-            UPDATE STATUS
-        ========================== -->
-        <label class="label">Update Status</label>
-        <select name="status">
-            <option value="Open" {% if ticket.status == "Open" %}selected{% endif %}>Open</option>
-            <option value="In Progress" {% if ticket.status == "In Progress" %}selected{% endif %}>In Progress</option>
-            <option value="Resolved" {% if ticket.status == "Resolved" %}selected{% endif %}>Resolved</option>
-        </select>
+            <label class="label">Update Status</label>
+            <select name="status">
+                <option value="Open" {{ "selected" if ticket.status == "Open" }}>Open</option>
+                <option value="In Progress" {{ "selected" if ticket.status == "In Progress" }}>In Progress</option>
+                <option value="Resolved" {{ "selected" if ticket.status == "Resolved" }}>Resolved</option>
+            </select>
 
-        <!-- =========================
-            UPDATE PRIORITY
-        ========================== -->
-        
-        {% if current_user.role == "admin" %}
-        
-        <label class="label">Update Priority</label>
-        <select name="priority">
-            <option value="High" {% if ticket[5] == "High" %}selected{% endif %}>High</option>
-            <option value="Medium" {% if ticket[5] == "Medium" %}selected{% endif %}>Medium</option>
-            <option value="Low" {% if ticket[5] == "Low" %}selected{% endif %}>Low</option>
-        </select>
+            {% if current_user.role == "admin" %}
+                <label class="label">Update Priority</label>
+                <select name="priority">
+                    <option value="High" {{ "selected" if ticket.priority == "High" }}>High</option>
+                    <option value="Medium" {{ "selected" if ticket.priority == "Medium" }}>Medium</option>
+                    <option value="Low" {{ "selected" if ticket.priority == "Low" }}>Low</option>
+                </select>
 
-        <!-- =========================
-            ASSIGN AGENT (ADMIN ONLY)
-        ========================== -->
+                <label class="label">Assign Agent</label>
+                <select name="assigned_to">
+                    <option value="">Unassigned</option>
+                    {% for agent in agents %}
+                        <option value="{{ agent.id }}"
+                            {{ "selected" if ticket.assigned_to == agent.id }}>
+                            {{ agent.email }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
 
-        <label class="label">Assign Agent</label>
-        <select name="assigned_to">
-            <option value="">Unassigned</option>
-            {% for agent in agents %}
-                <option value="{{ agent.id }}"
-                    {% if ticket.assigned_to == agent.id %}selected{% endif %}>
-                    {{ agent.email }}
-                </option>
-            {% endfor %}
-        </select>
-
-        {% endif %}
-
-        <!-- =========================
-            SUBMIT
-        ========================== -->
-        <button type="submit">Save Changes</button>
-
-    </form>
-
-    <br><br>
-
-    <div class="ticket-notes">
-        <h3>📝 Ticket Notes</h3>
-    
-        {% if notes %}
-            {% for n in notes %}
-            <div class="note-item">
-                <div class="note-header">
-                    <strong>{{ n.email }}</strong>
-                    <span class="note-role">{{ n.role|upper }}</span>
-                    <small>{{ n.created_at }}</small>
-                </div>
-                <p>{{ n.note }}</p>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-notes">No notes yet.</p>
-        {% endif %}
-    
-        <form method="POST" class="note-form">
-            <textarea name="note" required placeholder="Write a note..."></textarea>
-            <button type="submit">Add Note</button>
+            <br>
+            <button class="btn-primary" type="submit">Save Changes</button>
         </form>
+
+        <a href="/" class="back-link">← Back to Dashboard</a>
     </div>
 
-    <a href="/" class="ticket-link">← Back to Dashboard</a>
+    <!-- ================= RIGHT: NOTES ================= -->
+    <div class="ticket-right">
+        <h3>📝 Ticket Notes</h3>
+
+        <div class="notes-list">
+            {% if notes %}
+                {% for n in notes %}
+                    <div class="note-item">
+                        <div class="note-header">
+                            <strong>{{ n.email }}</strong>
+                            <span class="note-role">{{ n.role|upper }}</span>
+                            <small>{{ n.created_at }}</small>
+                        </div>
+                        <p>{{ n.note }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No notes yet.</p>
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            <textarea name="note" placeholder="Write a note..." required></textarea>
+            <button class="btn-secondary" type="submit">Add Note</button>
+        </form>
+    </div>
 
 </div>
 
 </body>
 </html>
+
 
