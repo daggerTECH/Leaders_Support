@@ -9,13 +9,6 @@ from werkzeug.utils import secure_filename
 
 ticket_bp = Blueprint("ticket", __name__)
 
-def allowed_file(filename):
-    return (
-        "." in filename and
-        filename.rsplit(".", 1)[1].lower()
-        in current_app.config.get("ALLOWED_EXTENSIONS", {"png", "jpg", "jpeg", "gif"})
-    )
-
 
 # ============================
 # DASHBOARD (Enhanced with Search + Filters + KPIs + Chart Data)
@@ -219,6 +212,7 @@ def view_ticket(id):
     # ============================
     # HANDLE POST
     # ============================
+    
     if request.method == "POST":
 
         # ============================
@@ -410,3 +404,4 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
