@@ -208,9 +208,36 @@ def view_ticket(id):
         return "Ticket not found", 404
 
     # ============================
-    # UPDATE TICKET
+    # HANDLE POST (UPDATE OR NOTE)
     # ============================
     if request.method == "POST":
+
+        # ============================
+        # ADD NOTE (ADMIN + AGENT)
+        # ============================
+        if "note" in request.form:
+            note = request.form.get("note", "").strip()
+
+            if note:
+                session.execute(
+                    text("""
+                        INSERT INTO ticket_notes (ticket_id, user_id, note)
+                        VALUES (:ticket_id, :user_id, :note)
+                    """),
+                    {
+                        "ticket_id": id,
+                        "user_id": current_user.id,
+                        "note": note
+                    }
+                )
+                session.commit()
+
+            session.close()
+            return redirect(url_for("ticket.view_ticket", id=id))
+
+        # ============================
+        # UPDATE TICKET
+        # ============================
         status = request.form.get("status")
         priority = request.form.get("priority")
         assigned_to = request.form.get("assigned_to")
@@ -287,7 +314,6 @@ def view_ticket(id):
 
         session.commit()
         session.close()
-
         return redirect(url_for("ticket.view_ticket", id=id))
 
     # ============================
@@ -299,11 +325,31 @@ def view_ticket(id):
             text("SELECT id, email FROM users WHERE role = 'agent'")
         ).fetchall()
 
+    # ============================
+    # LOAD NOTES
+    # ============================
+    notes = session.execute(
+        text("""
+            SELECT 
+                n.note,
+                n.created_at,
+                u.email,
+                u.role
+            FROM ticket_notes n
+            JOIN users u ON n.user_id = u.id
+            WHERE n.ticket_id = :tid
+            ORDER BY n.created_at DESC
+        """),
+        {"tid": id}
+    ).fetchall()
+
     session.close()
 
     return render_template(
         "ticket.html",
         ticket=ticket,
-        agents=agents
+        agents=agents,
+        notes=notes
     )
+
 
