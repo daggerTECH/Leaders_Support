@@ -21,3 +21,9 @@ class Config:
     # SLACK NOTIFIER
     SLACK_WEBHOOK_URL = "SLACK_WEBHOOK_URL"
 
+    # ATTACHMENTS
+    UPLOAD_FOLDER = "static/uploads"
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB per file
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+
