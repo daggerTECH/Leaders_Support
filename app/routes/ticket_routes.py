@@ -4,8 +4,17 @@ from sqlalchemy import text
 from datetime import datetime
 from flask_login import current_user
 from app.utils.slack_notifier import notify_user
+import os
+from werkzeug.utils import secure_filename
 
 ticket_bp = Blueprint("ticket", __name__)
+
+def allowed_file(filename):
+    return (
+        "." in filename and
+        filename.rsplit(".", 1)[1].lower()
+        in current_app.config.get("ALLOWED_EXTENSIONS", {"png", "jpg", "jpeg", "gif"})
+    )
 
 
 # ============================
@@ -191,7 +200,7 @@ def view_ticket(id):
     session = current_app.session()
 
     # ============================
-    # LOAD TICKET (BEFORE POST)
+    # LOAD TICKET
     # ============================
     ticket = session.execute(
         text("""
@@ -208,18 +217,20 @@ def view_ticket(id):
         return "Ticket not found", 404
 
     # ============================
-    # HANDLE POST (UPDATE OR NOTE)
+    # HANDLE POST
     # ============================
     if request.method == "POST":
 
         # ============================
-        # ADD NOTE (ADMIN + AGENT)
+        # ADD NOTE (+ IMAGES)
         # ============================
         if "note" in request.form:
-            note = request.form.get("note", "").strip()
+            note_text = request.form.get("note", "").strip()
+            files = request.files.getlist("images")
 
-            if note:
-                session.execute(
+            if note_text:
+                # Insert note
+                result = session.execute(
                     text("""
                         INSERT INTO ticket_notes (ticket_id, user_id, note)
                         VALUES (:ticket_id, :user_id, :note)
@@ -227,9 +238,40 @@ def view_ticket(id):
                     {
                         "ticket_id": id,
                         "user_id": current_user.id,
-                        "note": note
+                        "note": note_text
                     }
                 )
+                note_id = result.lastrowid
+
+                # Save images
+                upload_root = current_app.config.get("UPLOAD_FOLDER", "static/uploads")
+                note_folder = os.path.join(
+                    upload_root,
+                    "tickets",
+                    f"ticket_{id}",
+                    f"note_{note_id}"
+                )
+                os.makedirs(note_folder, exist_ok=True)
+
+                for file in files:
+                    if file and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        filepath = os.path.join(note_folder, filename)
+                        file.save(filepath)
+
+                        session.execute(
+                            text("""
+                                INSERT INTO note_attachments
+                                (note_id, file_path, file_type)
+                                VALUES (:note_id, :path, :type)
+                            """),
+                            {
+                                "note_id": note_id,
+                                "path": filepath,
+                                "type": file.mimetype
+                            }
+                        )
+
                 session.commit()
 
             session.close()
@@ -246,7 +288,7 @@ def view_ticket(id):
         old_status = ticket.status
 
         # ----------------------------
-        # ADMIN: FULL CONTROL
+        # ADMIN
         # ----------------------------
         if current_user.role == "admin":
             session.execute(
@@ -266,7 +308,6 @@ def view_ticket(id):
                 }
             )
 
-            # 🔔 Notify newly assigned agent
             if assigned_to and str(old_assigned_to) != str(assigned_to):
                 notify_user(
                     session,
@@ -277,7 +318,7 @@ def view_ticket(id):
                 )
 
         # ----------------------------
-        # AGENT: STATUS ONLY (OWN TICKET)
+        # AGENT
         # ----------------------------
         elif current_user.role == "agent":
             if ticket.assigned_to != current_user.id:
@@ -297,7 +338,7 @@ def view_ticket(id):
                 }
             )
 
-        # 🔔 Notify admin(s) if status changed
+        # Notify admins on status change
         if status != old_status:
             admins = session.execute(
                 text("SELECT id FROM users WHERE role = 'admin'")
@@ -317,7 +358,7 @@ def view_ticket(id):
         return redirect(url_for("ticket.view_ticket", id=id))
 
     # ============================
-    # LOAD AGENTS (ADMIN ONLY)
+    # LOAD AGENTS
     # ============================
     agents = []
     if current_user.role == "admin":
@@ -326,11 +367,12 @@ def view_ticket(id):
         ).fetchall()
 
     # ============================
-    # LOAD NOTES
+    # LOAD NOTES + IMAGES
     # ============================
     notes = session.execute(
         text("""
             SELECT 
+                n.id,
                 n.note,
                 n.created_at,
                 u.email,
@@ -343,13 +385,28 @@ def view_ticket(id):
         {"tid": id}
     ).fetchall()
 
+    attachments = session.execute(
+        text("""
+            SELECT note_id, file_path
+            FROM note_attachments
+            WHERE note_id IN (
+                SELECT id FROM ticket_notes WHERE ticket_id = :tid
+            )
+        """),
+        {"tid": id}
+    ).fetchall()
+
+    # Group images by note
+    images_by_note = {}
+    for a in attachments:
+        images_by_note.setdefault(a.note_id, []).append(a.file_path)
+
     session.close()
 
     return render_template(
         "ticket.html",
         ticket=ticket,
         agents=agents,
-        notes=notes
+        notes=notes,
+        images_by_note=images_by_note
     )
-
-
