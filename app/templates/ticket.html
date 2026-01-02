@@ -138,7 +138,7 @@
                         {% if images_by_note.get(n.id) %}
                             <div class="note-images">
                                 {% for img in images_by_note[n.id] %}
-                                    <img src="{{ url_for('upload', filename=img.file_path) }}" class="note-image" loading="lazy">
+                                    <img src="{{ url_for('static', filename=img.file_path) }}" class="note-image" loading="lazy">
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -160,6 +160,7 @@
 
 </body>
 </html>
+
 
 
 
