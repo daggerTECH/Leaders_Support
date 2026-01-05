@@ -323,6 +323,26 @@ notifBtn.addEventListener("click", () => {
     notifDropdown.classList.toggle("hidden");
 });
 
+function timeAgo(dateString) {
+    const now = new Date();
+    const past = new Date(dateString);
+    const seconds = Math.floor((now - past) / 1000);
+
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+
+    return past.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: now.getFullYear() !== past.getFullYear() ? "numeric" : undefined
+    });
+}
+
 /* ============================
    FETCH UNREAD NOTIFICATIONS
 ============================ */
@@ -351,7 +371,7 @@ async function fetchNotifications() {
                    onclick="markNotificationRead(${n.id})">
                     <strong>${n.ticket_code}</strong><br>
                     ${n.message}
-                    <small>{{ n.created_at | timeago }}</small>
+                    <small>${timeAgo(n.created_at)}</small>
                 </a>
             `;
 
@@ -407,7 +427,7 @@ async function loadAllNotifications() {
                onclick="markNotificationRead(${n.id})">
                 <strong>${n.ticket_code}</strong><br>
                 ${n.message}
-                <small>{{ n.created_at | timeago }}</small>
+                <small>${timeAgo(n.created_at)}</small>
             </a>
         `;
 
@@ -434,6 +454,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
