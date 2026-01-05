@@ -1355,6 +1355,60 @@ button {
   }
 }
 
+/* ==========================================================
+   MOBILE FIX — NOTIFICATION DROPDOWN
+   ========================================================== */
+@media (max-width: 768px) {
+
+  .notification-wrapper {
+    position: relative;
+  }
+
+  .notif-dropdown {
+    position: fixed;              /* 🔑 anchor to viewport */
+    top: 60px;                    /* below navbar */
+    right: 12px;
+    left: 12px;                   /* full-width feel */
+    width: auto;
+    max-width: 100%;
+    max-height: 65vh;             /* prevent overflow */
+    overflow-y: auto;
+    border-radius: 12px;
+    z-index: 9999;                /* above everything */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  }
+
+  .notif-header {
+    position: sticky;
+    top: 0;
+    background: #0f172a;
+    z-index: 2;
+  }
+
+  .notif-footer {
+    position: sticky;
+    bottom: 0;
+    background: #0f172a;
+    z-index: 2;
+  }
+
+  .notif-list {
+    padding-bottom: 10px;
+  }
+
+  .notif-btn {
+    position: relative;
+  }
+
+  .notif-badge {
+    top: -6px;
+    right: -6px;
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+}
+
+
 
 
 
