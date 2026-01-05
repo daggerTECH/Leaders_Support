@@ -56,6 +56,8 @@ ALLOWED_SENDERS = {
     "fromit8@gmail.com",
     "danny.villanueva@leaders.st",
     "momitabaligya@gmail.com",
+    "clientsupport@leaders.st",
+    "gomegxxiv@gmail.com",
 }
 
 
@@ -349,6 +351,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
