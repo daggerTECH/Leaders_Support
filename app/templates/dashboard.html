@@ -385,12 +385,19 @@ async function fetchNotifications() {
             li.className = "notification-item unread";
 
             li.innerHTML = `
-                <a href="/ticket/${n.ticket_id}"
-                   onclick="markNotificationRead(${n.id})">
-                    <strong>${n.ticket_code}</strong><br>
-                    ${n.message}
-                    <small>${timeAgo(n.created_at)}</small>
-                </a>
+                <div class="notif-row">
+                    <input type="checkbox"
+                           class="notif-check"
+                           onchange="markNotificationRead(${n.id}, false)"
+                           ${n.is_read ? "checked disabled" : ""}>
+            
+                    <a href="/ticket/${n.ticket_id}"
+                       onclick="markNotificationRead(${n.id}, true)">
+                        <strong>${n.ticket_code}</strong><br>
+                        ${n.message}
+                        <small class="timeago" data-time="${n.created_at}"></small>
+                    </a>
+                </div>
             `;
 
             notifList.appendChild(li);
@@ -441,12 +448,19 @@ async function loadAllNotifications() {
         li.className = `notification-item ${n.is_read ? "read" : "unread"}`;
 
         li.innerHTML = `
-            <a href="/ticket/${n.ticket_id}"
-               onclick="markNotificationRead(${n.id})">
-                <strong>${n.ticket_code}</strong><br>
-                ${n.message}
-                <small>${timeAgo(n.created_at)}</small>
-            </a>
+            <div class="notif-row">
+                <input type="checkbox"
+                       class="notif-check"
+                       onchange="markNotificationRead(${n.id}, false)"
+                       ${n.is_read ? "checked disabled" : ""}>
+        
+                <a href="/ticket/${n.ticket_id}"
+                   onclick="markNotificationRead(${n.id}, true)">
+                    <strong>${n.ticket_code}</strong><br>
+                    ${n.message}
+                    <small class="timeago" data-time="${n.created_at}"></small>
+                </a>
+            </div>
         `;
 
         notifList.appendChild(li);
@@ -472,6 +486,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
