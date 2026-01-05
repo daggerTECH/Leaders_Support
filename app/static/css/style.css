@@ -68,6 +68,93 @@ button:hover, .btn:hover {
     color: #93c5fd;
 }
 
+/* ================================
+   DASHBOARD MOBILE FIX (TOP AREA)
+================================ */
+@media (max-width: 768px) {
+
+    /* ===== PAGE PADDING ===== */
+    .dashboard-container {
+        padding: 12px;
+    }
+
+    /* =========================
+       KPI CARDS
+    ========================= */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 per row */
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .kpi-card {
+        padding: 12px;
+        text-align: center;
+    }
+
+    .kpi-card h3 {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .kpi-number {
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    /* =========================
+       SEARCH + FILTER BAR
+    ========================= */
+    .filter-bar {
+        margin-bottom: 15px;
+    }
+
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-search,
+    .filter-select,
+    .filter-form button {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    /* =========================
+       CHART GRID
+    ========================= */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* stack charts */
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+
+    .chart-card {
+        padding: 12px;
+    }
+
+    /* =========================
+       FIX CHART STRETCH
+    ========================= */
+    .chart-card canvas {
+        max-width: 100% !important;
+        max-height: 260px !important;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* =========================
+       PREVENT OVERFLOW
+    ========================= */
+    body {
+        overflow-x: hidden;
+    }
+}
+
 /* ===============================
    DASHBOARD LAYOUT
    =============================== */
@@ -1207,6 +1294,7 @@ button {
     background: #0f766e;
 
 }
+
 
 
 
