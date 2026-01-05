@@ -130,7 +130,7 @@
                         <div class="note-header">
                             <strong>{{ n.email }}</strong>
                             <span class="note-role">{{ n.role|upper }}</span>
-                            <small>{{ n.created_at }}</small>
+                            <small>{{ n.created_at | timeago }}</small>
                         </div>
                         
                         <p>{{ n.note }}</p>
@@ -164,6 +164,7 @@
 
 </body>
 </html>
+
 
 
 
