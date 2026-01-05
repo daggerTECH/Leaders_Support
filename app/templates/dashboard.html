@@ -11,7 +11,11 @@
 
 <!-- NAVIGATION -->
 <div class="nav">
-    <div class="nav-title">Ticket Dashboard</div>
+    <div class="nav-title">
+        <img src="{{ url_for('static', filename='images/leaders-logo.png') }}"
+             alt="Leaders Marketing"
+             class="nav-logo">
+    </div>
 
     <div class="nav-links">
         {% if current_user.role == "admin" %}
@@ -430,6 +434,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
