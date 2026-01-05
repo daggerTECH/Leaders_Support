@@ -326,13 +326,16 @@ notifBtn.addEventListener("click", () => {
 function timeAgo(dateString) {
     const now = new Date();
     const past = new Date(dateString);
-    const seconds = Math.floor((now - past) / 1000);
+    const diff = Math.floor((now - past) / 1000);
 
-    if (seconds < 60) return "just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} min ago`;
+    if (diff < 60) return "just now";
+
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hr ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
 
@@ -342,6 +345,21 @@ function timeAgo(dateString) {
         year: now.getFullYear() !== past.getFullYear() ? "numeric" : undefined
     });
 }
+
+function updateTimeago() {
+    document.querySelectorAll(".timeago").forEach(el => {
+        const time = el.dataset.time;
+        if (time) {
+            el.textContent = timeAgo(time);
+        }
+    });
+}
+
+// Initial run
+updateTimeago();
+
+// Update every 60 seconds
+setInterval(updateTimeago, 60000);
 
 /* ============================
    FETCH UNREAD NOTIFICATIONS
@@ -454,6 +472,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
