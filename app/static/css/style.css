@@ -256,113 +256,6 @@ tr:hover td {
     background: #0f172a;
 }
 
-/* ================================
-   MOBILE RESPONSIVE DASHBOARD
-================================ */
-
-/* Hide mobile cards by default */
-.mobile-ticket-list {
-    display: none;
-}
-
-/* ================================
-   MOBILE BREAKPOINT
-================================ */
-@media (max-width: 768px) {
-
-    /* ===== LAYOUT ===== */
-    .dashboard-container {
-        padding: 10px;
-    }
-
-    /* ===== KPI CARDS ===== */
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .kpi-card h3 {
-        font-size: 13px;
-    }
-
-    .kpi-number {
-        font-size: 22px;
-    }
-
-    /* ===== FILTER BAR ===== */
-    .filter-form {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .filter-search,
-    .filter-select,
-    .filter-form button {
-        width: 100%;
-    }
-
-    /* ===== CHARTS ===== */
-    .chart-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    canvas {
-        max-height: 260px !important;
-    }
-
-    /* ===== TABLE OFF ===== */
-    table {
-        display: none;
-    }
-
-    /* ===== MOBILE TICKETS ON ===== */
-    .mobile-ticket-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .mobile-ticket {
-        background: #1e293b;
-        padding: 12px;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0,0,0,.4);
-    }
-
-    .mobile-ticket-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 6px;
-    }
-
-    .mobile-ticket-code {
-        font-weight: bold;
-        color: #93c5fd;
-    }
-
-    .mobile-ticket-row {
-        font-size: 13px;
-        margin-top: 6px;
-    }
-
-    .mobile-ticket-action {
-        margin-top: 10px;
-    }
-
-    .mobile-view-btn {
-        display: block;
-        text-align: center;
-        background: #2563eb;
-        color: #fff;
-        padding: 8px;
-        border-radius: 6px;
-        font-size: 14px;
-        text-decoration: none;
-    }
-}
-
 /* ===============================
    TICKET LINK
    =============================== */
@@ -1314,6 +1207,7 @@ button {
     background: #0f766e;
 
 }
+
 
 
 
