@@ -351,7 +351,7 @@ async function fetchNotifications() {
                    onclick="markNotificationRead(${n.id})">
                     <strong>${n.ticket_code}</strong><br>
                     ${n.message}
-                    <small>${n.created_at}</small>
+                    <small>{{ n.created_at | timeago }}</small>
                 </a>
             `;
 
@@ -407,7 +407,7 @@ async function loadAllNotifications() {
                onclick="markNotificationRead(${n.id})">
                 <strong>${n.ticket_code}</strong><br>
                 ${n.message}
-                <small>${n.created_at}</small>
+                <small>{{ n.created_at | timeago }}</small>
             </a>
         `;
 
@@ -434,6 +434,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
