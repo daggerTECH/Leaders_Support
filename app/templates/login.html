@@ -7,6 +7,15 @@
 
 <body>
 
+<!-- GLOBAL LOADER -->
+<div id="globalLoader" class="loader-overlay hidden">
+    <div class="loader-circle">
+        <img src="{{ url_for('static', filename='images/loader-logo.png') }}"
+             alt="Loading"
+             class="loader-logo">
+    </div>
+</div>
+
 <div class="login-container">
 
     <h2 class="login-title">Welcome Back</h2>
@@ -15,7 +24,7 @@
         <div class="error-message">{{ error }}</div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" onsubmit="showLoader()">
 
         <!-- Email -->
         <div class="form-group">
@@ -31,17 +40,32 @@
             <span class="show-pass" onclick="togglePass()">👁</span>
         </div>
 
-        <button type="submit" class="login-btn">Login</button>
+        <button type="submit" class="login-btn" onsubmit="showLoader()">Login</button>
 
     </form>
 
     <div class="sub-links">
-        <a href="/forgot-password">Forgot Password?</a>
+        <a href="/forgot-password" onsubmit="showLoader()">Forgot Password?</a>
     </div>
 
 </div>
 
 <script>
+const loader = document.getElementById("globalLoader");
+
+    function showLoader() {
+        if (loader) loader.classList.remove("hidden");
+    }
+
+    function hideLoader() {
+        if (loader) loader.classList.add("hidden");
+    }
+
+    // Hide loader when page fully loads
+    window.addEventListener("load", () => {
+        hideLoader();
+    });
+    
 function togglePass() {
     const p = document.getElementById("password");
     p.type = p.type === "password" ? "text" : "password";
@@ -50,3 +74,4 @@ function togglePass() {
 
 </body>
 </html>
+
