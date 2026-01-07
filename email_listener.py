@@ -103,31 +103,22 @@ ALLOWED_SENDER_DOMAINS = {
 # ============================================================
 # TICKET GENERATION FILTER
 # ============================================================
-def should_generate_ticket(sender_email: str, recipient_email: str) -> bool:
+def should_generate_ticket(sender_email: str, recipient_emails: list[str]) -> bool:
     sender_email = sender_email.lower().strip()
-    recipient_email = recipient_email.lower().strip()
 
-    # 1️⃣ Must be sent TO leaders.st
-    if not recipient_email.endswith("@leaders.st"):
-        return False
-
-    # 2️⃣ Prevent internal loops
-    if sender_email.endswith("@leaders.st"):
+    # Must be sent to the distro
+    if not any(
+        r.lower().strip() == "clientsupport@leaders.st"
+        for r in recipient_emails
+    ):
         return False
 
     sender_domain = sender_email.split("@")[-1]
 
-    # 3️⃣ Explicit allow
-    if sender_email in ALLOWED_SENDER_EMAILS:
-        return True
-
-    # 4️⃣ Domain allow
-    if sender_domain in ALLOWED_SENDER_DOMAINS:
-        return True
-
-    print(f"🚫 Blocked sender: {sender_email}")
-    return False
-
+    return (
+        sender_email in ALLOWED_SENDER_EMAILS
+        or sender_domain in ALLOWED_SENDER_DOMAINS
+    )
 
 # ============================================================
 # UTIL: CLEAN SENDER
@@ -420,6 +411,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
