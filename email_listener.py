@@ -49,16 +49,84 @@ SMTP_USER = EMAIL_USER
 SMTP_PASS = EMAIL_PASS
 
 
-# ============================================================
-# ALLOWED SENDERS
-# ============================================================
-ALLOWED_SENDERS = {
-    "fromit8@gmail.com",
-    "danny.villanueva@leaders.st",
-    "momitabaligya@gmail.com",
-    "clientsupport@leaders.st",
-    "gomegxxiv@gmail.com",
+ALLOWED_SENDER_EMAILS = {
+    "specialedflint@gmail.com",
+    "joel@vecchio-law.com",
+    "grandelaw@live.com",
+    "mhumble@rhodes-humble.com",
 }
+
+ALLOWED_SENDER_DOMAINS = {
+    "kplitigators.com",
+    "kksblaw.com",
+    "aavlawfirm.com",
+    "grittonlaw.com",
+    "brandpeters.com",
+    "kahnlawfirm.com",
+    "madialawfirm.com",
+    "foleygriffin.com",
+    "morganbourque.com",
+    "woodlandsattorneys.com",
+    "tedfordlaw.com",
+    "texascountrytitle.com",
+    "shanehinch.com",
+    "fortheworkers.com",
+    "ufkeslaw.com",
+    "webbstokessparks.com",
+    "amatteroflaw.com",
+    "edwardflintlawyer.com",
+    "jdsmithlaw.com",
+    "adllaw.org",
+    "davesautosarasota.com",
+    "longwelllawyers.com",
+    "perniklaw.com",
+    "vecchio-law.com",
+    "vecchioinjurylaw.com",
+    "rhodes-humble.com",
+    "awclawyer.com",
+    "fresnodefense.com",
+    "nh-lawyers.com",
+    "kaleitalawfirm.com",
+    "juliolawfirm.com",
+    "skierlawfirm.com",
+    "mccormackpc.com",
+    "snowlawfirm.com",
+    "grandelaw.com",
+    "frederickslaw.net",
+    "caworkinjurylaw.com",
+    "nathanmillerlaw.com",
+    "willislaw.com",
+    "restivolaw.com",
+    "lannenlawpllc.com",
+}
+
+# ============================================================
+# TICKET GENERATION FILTER
+# ============================================================
+def should_generate_ticket(sender_email: str, recipient_email: str) -> bool:
+    sender_email = sender_email.lower().strip()
+    recipient_email = recipient_email.lower().strip()
+
+    # 1️⃣ Must be sent TO leaders.st
+    if not recipient_email.endswith("@leaders.st"):
+        return False
+
+    # 2️⃣ Prevent internal loops
+    if sender_email.endswith("@leaders.st"):
+        return False
+
+    sender_domain = sender_email.split("@")[-1]
+
+    # 3️⃣ Explicit allow
+    if sender_email in ALLOWED_SENDER_EMAILS:
+        return True
+
+    # 4️⃣ Domain allow
+    if sender_domain in ALLOWED_SENDER_DOMAINS:
+        return True
+
+    print(f"🚫 Blocked sender: {sender_email}")
+    return False
 
 
 # ============================================================
@@ -257,8 +325,9 @@ def process_latest_email(mail, session):
         return False
 
     sender = normalize_sender(msg.get("From"))
-
-    if sender not in ALLOWED_SENDERS:
+    recipient = email.utils.parseaddr(msg.get("To"))[1]
+    
+    if not should_generate_ticket(sender, recipient):
         save_last_uid(int(uid))
         return False
 
@@ -351,6 +420,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
