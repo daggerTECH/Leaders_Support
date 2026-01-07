@@ -48,57 +48,9 @@ SMTP_PORT = 587
 SMTP_USER = EMAIL_USER
 SMTP_PASS = EMAIL_PASS
 
-
-ALLOWED_SENDER_EMAILS = {
-    "specialedflint@gmail.com",
-    "joel@vecchio-law.com",
-    "grandelaw@live.com",
-    "mhumble@rhodes-humble.com",
-}
-
-ALLOWED_SENDER_DOMAINS = {
-    "kplitigators.com",
-    "kksblaw.com",
-    "aavlawfirm.com",
-    "grittonlaw.com",
-    "brandpeters.com",
-    "kahnlawfirm.com",
-    "madialawfirm.com",
-    "foleygriffin.com",
-    "morganbourque.com",
-    "woodlandsattorneys.com",
-    "tedfordlaw.com",
-    "texascountrytitle.com",
-    "shanehinch.com",
-    "fortheworkers.com",
-    "ufkeslaw.com",
-    "webbstokessparks.com",
-    "amatteroflaw.com",
-    "edwardflintlawyer.com",
-    "jdsmithlaw.com",
-    "adllaw.org",
-    "davesautosarasota.com",
-    "longwelllawyers.com",
-    "perniklaw.com",
-    "vecchio-law.com",
-    "vecchioinjurylaw.com",
-    "rhodes-humble.com",
-    "awclawyer.com",
-    "fresnodefense.com",
-    "nh-lawyers.com",
-    "kaleitalawfirm.com",
-    "juliolawfirm.com",
-    "skierlawfirm.com",
-    "mccormackpc.com",
-    "snowlawfirm.com",
-    "grandelaw.com",
-    "frederickslaw.net",
-    "caworkinjurylaw.com",
-    "nathanmillerlaw.com",
-    "willislaw.com",
-    "restivolaw.com",
-    "lannenlawpllc.com",
-}
+ALLOWED_SENDER_EMAILS = current_app.config["ALLOWED_SENDER_EMAILS"]
+ALLOWED_SENDER_DOMAINS = current_app.config["ALLOWED_SENDER_DOMAINS"]
+TICKET_INBOX = current_app.config["TICKET_INBOX"]
 
 # ============================================================
 # TICKET GENERATION FILTER
@@ -411,6 +363,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
