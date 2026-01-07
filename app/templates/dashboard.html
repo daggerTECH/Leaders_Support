@@ -9,6 +9,15 @@
 
 <body>
 
+<!-- GLOBAL LOADER -->
+<div id="globalLoader" class="loader-overlay hidden">
+    <div class="loader-circle">
+        <img src="{{ url_for('static', filename='images/loader-logo.png') }}"
+             alt="Loading"
+             class="loader-logo">
+    </div>
+</div>
+
 <!-- NAVIGATION -->
 <div class="nav">
     <div class="nav-title">
@@ -476,6 +485,7 @@ setInterval(fetchNotifications, 10000);
 
 </body>
 </html>
+
 
 
 
