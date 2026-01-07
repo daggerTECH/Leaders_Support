@@ -7,7 +7,6 @@ import socket
 import re
 import time
 from app.utils.notifier import notify_user
-from flask import current_app
 
 
 # ============================================================
@@ -49,9 +48,9 @@ SMTP_PORT = 587
 SMTP_USER = EMAIL_USER
 SMTP_PASS = EMAIL_PASS
 
-ALLOWED_SENDER_EMAILS = current_app.config["ALLOWED_SENDER_EMAILS"]
-ALLOWED_SENDER_DOMAINS = current_app.config["ALLOWED_SENDER_DOMAINS"]
-TICKET_INBOX = current_app.config["TICKET_INBOX"]
+ALLOWED_SENDER_EMAILS = create_app.config["ALLOWED_SENDER_EMAILS"]
+ALLOWED_SENDER_DOMAINS = create_app.config["ALLOWED_SENDER_DOMAINS"]
+TICKET_INBOX = create_app.config["TICKET_INBOX"]
 
 # ============================================================
 # TICKET GENERATION FILTER
@@ -364,6 +363,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
