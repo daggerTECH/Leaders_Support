@@ -187,7 +187,7 @@ def create_ticket(session, sender, subject, body, message_id):
 #        time.sleep(3)
 
 #        msg = MIMEMultipart()
-#        msg["From"] = "Leaders Support <danny.villanueva@leaders.st>"
+#        msg["From"] = "Leaders Support <clientsupport@leaders.st>"
 #        msg["To"] = to_email
 #        msg["Subject"] = f"Re: Ticket {ticket_code} received"
 #        msg["Reply-To"] = "primeadsdigital@gmail.com"
@@ -364,6 +364,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
