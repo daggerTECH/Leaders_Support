@@ -162,67 +162,67 @@ def create_ticket(session, sender, subject, body, message_id):
 # ============================================================
 # AUTO REPLY
 # ============================================================
-def send_auto_reply(to_email, ticket_code, original_msg):
-    import smtplib
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
-    import time
+#def send_auto_reply(to_email, ticket_code, original_msg):
+#    import smtplib
+#    from email.mime.text import MIMEText
+#    from email.mime.multipart import MIMEMultipart
+#    import time
 
-    print("📨 Preparing auto-reply...")
+#    print("📨 Preparing auto-reply...")
 
-    try:
+#    try:
         # ⏳ Small delay prevents Gmail suppression
-        time.sleep(3)
+#        time.sleep(3)
 
-        msg = MIMEMultipart()
-        msg["From"] = "Leaders Support <danny.villanueva@leaders.st>"
-        msg["To"] = to_email
-        msg["Subject"] = f"Re: Ticket {ticket_code} received"
-        msg["Reply-To"] = "primeadsdigital@gmail.com"
+#        msg = MIMEMultipart()
+#        msg["From"] = "Leaders Support <danny.villanueva@leaders.st>"
+#        msg["To"] = to_email
+#        msg["Subject"] = f"Re: Ticket {ticket_code} received"
+#        msg["Reply-To"] = "primeadsdigital@gmail.com"
 
         # 🔗 Reference original email (CRITICAL)
-        if original_msg.get("Message-ID"):
-            msg["In-Reply-To"] = original_msg.get("Message-ID")
-            msg["References"] = original_msg.get("Message-ID")
+#        if original_msg.get("Message-ID"):
+#            msg["In-Reply-To"] = original_msg.get("Message-ID")
+#            msg["References"] = original_msg.get("Message-ID")
 
         # ✅ Mark as auto-reply (but NOT bulk)
-        msg["Auto-Submitted"] = "auto-replied"
+#        msg["Auto-Submitted"] = "auto-replied"
 
-        body = f"""
-Hello,
+#        body = f"""
+#Hello,
 
-Thank you for contacting Leaders Support.
+#Thank you for contacting Leaders Support.
 
-We have received your request and created a support ticket.
+#We have received your request and created a support ticket.
 
-Ticket Number: {ticket_code}
+#Ticket Number: {ticket_code}
 
-Our team will review your concern and get back to you shortly.
-You may reply to this email to add more information.
+#Our team will review your concern and get back to you shortly.
+#You may reply to this email to add more information.
 
-Best regards,
-Leaders Support Team
-"""
-        msg.attach(MIMEText(body, "plain"))
+#Best regards,
+#Leaders Support Team
+#"""
+#        msg.attach(MIMEText(body, "plain"))
 
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=20)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(SMTP_USER, SMTP_PASS)
+#        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=20)
+#        server.ehlo()
+#        server.starttls()
+#        server.ehlo()
+#        server.login(SMTP_USER, SMTP_PASS)
 
-        server.sendmail(
-            "primeadsdigital@gmail.com",
-            to_email,
-            msg.as_string()
-        )
+#        server.sendmail(
+#            "primeadsdigital@gmail.com",
+#            to_email,
+#            msg.as_string()
+#        )
 
-        server.quit()
-        print(f"✅ Auto-reply delivered to {to_email}")
+#        server.quit()
+#        print(f"✅ Auto-reply delivered to {to_email}")
 
-    except Exception as e:
-        print("❌ AUTO-REPLY FAILED")
-        print(type(e).__name__, ":", e)
+#    except Exception as e:
+#        print("❌ AUTO-REPLY FAILED")
+#        print(type(e).__name__, ":", e)
 
 # ============================================================
 # PROCESS LATEST EMAIL ONLY
@@ -351,6 +351,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
