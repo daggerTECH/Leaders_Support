@@ -1464,8 +1464,8 @@ button {
 /* Rotating Circle */
 .loader-circle {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 110px;
+    height: 110px;
     border: 5px solid rgba(255, 255, 255, 0.15);
     border-top: 5px solid #38bdf8;
     border-radius: 50%;
@@ -1487,6 +1487,17 @@ button {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+.loader-logo {
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+
 
 
 
