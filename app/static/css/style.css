@@ -1517,8 +1517,6 @@ button {
 /* Logo stays CENTERED and DOES NOT ROTATE */
 .loader-logo {
     position: absolute;
-    top: 50%;
-    left: 50%;
     width: 60px;
     height: auto;
     transform: translate(-50%, -50%);
@@ -1547,6 +1545,7 @@ button {
         transform: rotate(360deg);
     }
 }
+
 
 
 
