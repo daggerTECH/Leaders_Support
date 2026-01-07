@@ -42,7 +42,9 @@ class Config:
 
     ALLOWED_SENDER_EMAILS = {
         "specialedflint@gmail.com",
+        "joel@vecchio-law.com",
         "grandelaw@live.com",
+        "mhumble@rhodes-humble.com",
     }
 
     ALLOWED_SENDER_DOMAINS = {
@@ -87,3 +89,4 @@ class Config:
         "willislaw.com",
         "restivolaw.com",
     }
+
