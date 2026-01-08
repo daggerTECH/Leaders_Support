@@ -269,7 +269,7 @@ def process_latest_email(mail, session):
     if not message_id:
         message_id = f"fallback-{uid.decode()}"
 
-    # DB-level dedupe (final safety)
+    # DB-level dedupe
     exists = session.execute(
         text("SELECT 1 FROM tickets WHERE message_id = :mid"),
         {"mid": message_id}
@@ -280,14 +280,43 @@ def process_latest_email(mail, session):
         return False
 
     sender = normalize_sender(msg.get("From"))
+    sender_domain = sender.split("@")[-1]
 
-    if sender not in ALLOWED_SENDERS_EMAIL:
+    # 🚫 Ignore internal emails
+    if sender.endswith("@leaders.st"):
+        save_last_uid(int(uid))
+        return False
+
+    # 🚫 Ignore WordPress / system emails
+    if "wordpress" in sender or "no-reply" in sender:
+        save_last_uid(int(uid))
+        return False
+
+    # 🚫 Allow ONLY approved senders/domains
+    if (
+        sender not in ALLOWED_SENDER_EMAILS
+        and sender_domain not in ALLOWED_SENDER_DOMAINS
+    ):
         save_last_uid(int(uid))
         return False
 
     subject_raw, encoding = decode_header(msg.get("Subject"))[0]
-    subject = subject_raw.decode(encoding or "utf-8") if isinstance(subject_raw, bytes) else subject_raw
+    subject = (
+        subject_raw.decode(encoding or "utf-8", errors="ignore")
+        if isinstance(subject_raw, bytes)
+        else subject_raw
+    )
     subject = subject.strip() if subject else "(No Subject)"
+
+    # 🚫 Ignore replies & forwards
+    if (
+        msg.get("In-Reply-To")
+        or msg.get("References")
+        or subject.lower().startswith("re:")
+        or subject.lower().startswith("fw:")
+    ):
+        save_last_uid(int(uid))
+        return False
 
     body = ""
     if msg.is_multipart():
@@ -303,12 +332,11 @@ def process_latest_email(mail, session):
 
     ticket_code = create_ticket(session, sender, subject, body, message_id)
 
-    if ticket_code:
-        send_auto_reply(sender, ticket_code, msg)
+#  (Auto-reply optional — currently commented in your code)
+#    if ticket_code:
+#        send_auto_reply(sender, ticket_code, msg)
 
-    # ✅ Update UID marker
     save_last_uid(int(uid))
-
     return True
 
 
@@ -360,6 +388,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
