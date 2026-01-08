@@ -35,8 +35,8 @@ def save_last_uid(uid):
 # IMAP CONFIG
 # ============================================================
 IMAP_HOST = "imap.gmail.com"
-EMAIL_USER = "primeadsdigital@gmail.com"
-EMAIL_PASS = "mwwe grms mazj yqeg"
+EMAIL_USER = "danny.villanueva@leaders.st"
+EMAIL_PASS = "gewm ihry cfgn jnds"
 
 socket.setdefaulttimeout(30)
 
@@ -363,6 +363,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
