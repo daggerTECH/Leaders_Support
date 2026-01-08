@@ -121,18 +121,6 @@ def detect_priority(subject, body):
         return "Medium"
     return "Low"
 
-def should_generate_ticket(sender_email: str) -> bool:
-    sender_email = sender_email.lower().strip()
-    domain = sender_email.split("@")[-1]
-
-    if sender_email in ALLOWED_SENDER_EMAILS:
-        return True
-
-    if domain in ALLOWED_SENDER_DOMAINS:
-        return True
-
-    return False
-
 
 # ============================================================
 # CREATE TICKET (SAFE + DEDUPLICATED)
@@ -205,15 +193,15 @@ def create_ticket(session, sender, subject, body, message_id):
 
 #    print("📨 Preparing auto-reply...")
 
-#    try:
-#        # ⏳ Small delay prevents Gmail suppression
-#        time.sleep(3)
+#   try:
+#       # ⏳ Small delay prevents Gmail suppression
+#       time.sleep(3)
 
-#        msg = MIMEMultipart()
-#        msg["From"] = "Leaders Support <danny.villanueva@leaders.st>"
-#        msg["To"] = to_email
-#        msg["Subject"] = f"Re: Ticket {ticket_code} received"
-#        msg["Reply-To"] = "primeadsdigital@gmail.com"
+#       msg = MIMEMultipart()
+#       msg["From"] = "Leaders Support <danny.villanueva@leaders.st>"
+#       msg["To"] = to_email
+#       msg["Subject"] = f"Re: Ticket {ticket_code} received"
+#       msg["Reply-To"] = "primeadsdigital@gmail.com"
 
 #        # 🔗 Reference original email (CRITICAL)
 #        if original_msg.get("Message-ID"):
@@ -252,8 +240,8 @@ def create_ticket(session, sender, subject, body, message_id):
 #            msg.as_string()
 #        )
 
-#        server.quit()
-#        print(f"✅ Auto-reply delivered to {to_email}")
+ #       server.quit()
+ #       print(f"✅ Auto-reply delivered to {to_email}")
 
 #    except Exception as e:
 #        print("❌ AUTO-REPLY FAILED")
@@ -293,8 +281,7 @@ def process_latest_email(mail, session):
 
     sender = normalize_sender(msg.get("From"))
 
-    if not should_generate_ticket(sender):
-        print(f"🚫 Ignored sender: {sender}")
+    if sender not in ALLOWED_SENDERS_EMAIL:
         save_last_uid(int(uid))
         return False
 
@@ -373,5 +360,6 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
