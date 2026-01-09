@@ -420,7 +420,6 @@ async function fetchNotifications() {
    MARK SINGLE AS READ
 ============================ */
 async function markNotificationRead(notificationId) {
-    showLoader();
     await fetch(`/notifications/mark-read/${notificationId}`, {
         method: "POST"
     });
@@ -432,7 +431,6 @@ async function markNotificationRead(notificationId) {
    LOAD ALL (READ + UNREAD)
 ============================ */
 async function loadAllNotifications() {
-    showLoader();
     const res = await fetch("/notifications/all");
     const data = await res.json();
 
@@ -502,6 +500,7 @@ const loader = document.getElementById("globalLoader");
 
 </body>
 </html>
+
 
 
 
