@@ -7,6 +7,7 @@ from app.utils.slack_notifier import notify_user
 import os
 from werkzeug.utils import secure_filename
 from app.utils.files import allowed_file
+from datetime import datetime, timedelta
 
 ticket_bp = Blueprint("ticket", __name__)
 
@@ -211,9 +212,36 @@ def view_ticket(id):
         return "Ticket not found", 404
 
     # ============================
+    # 🔍 VIEW ACTIVITY (GET ONLY)
+    # ============================
+    if request.method == "GET":
+        recent_view = session.execute(
+            text("""
+                SELECT 1 FROM ticket_notes
+                WHERE ticket_id = :ticket_id
+                  AND user_id = :user_id
+                  AND is_system = 1
+                  AND note LIKE '%viewed this ticket%'
+                  AND created_at >= NOW() - INTERVAL 10 MINUTE
+                LIMIT 1
+            """),
+            {
+                "ticket_id": id,
+                "user_id": current_user.id
+            }
+        ).fetchone()
+
+        if not recent_view:
+            log_ticket_activity(
+                session,
+                id,
+                f"👀 {current_user.email} viewed this ticket"
+            )
+            session.commit()
+
+    # ============================
     # HANDLE POST
     # ============================
-    
     if request.method == "POST":
 
         # ============================
@@ -222,9 +250,8 @@ def view_ticket(id):
         if "note" in request.form:
             note_text = request.form.get("note", "").strip()
             files = request.files.getlist("images")
-        
+
             if note_text:
-                # 1️⃣ Insert note first
                 result = session.execute(
                     text("""
                         INSERT INTO ticket_notes (ticket_id, user_id, note)
@@ -237,31 +264,18 @@ def view_ticket(id):
                     }
                 )
                 note_id = result.lastrowid
-            
-                # 2️⃣ RELATIVE path (stored in DB & used by url_for)
+
                 relative_dir = os.path.join(
-                    "uploads",
-                    "tickets",
-                    f"ticket_{id}",
-                    f"note_{note_id}"
+                    "uploads", "tickets", f"ticket_{id}", f"note_{note_id}"
                 )
-            
-                # 3️⃣ ABSOLUTE filesystem path (where file is saved)
-                upload_dir = os.path.join(
-                    current_app.static_folder,
-                    relative_dir
-                )
-            
+                upload_dir = os.path.join(current_app.static_folder, relative_dir)
                 os.makedirs(upload_dir, exist_ok=True)
-            
+
                 for file in files:
                     if file and allowed_file(file.filename):
                         filename = secure_filename(file.filename)
-            
-                        absolute_path = os.path.join(upload_dir, filename)
-                        file.save(absolute_path)
-            
-                        # 4️⃣ Store RELATIVE path ONLY (NO static/, NO app/)
+                        file.save(os.path.join(upload_dir, filename))
+
                         session.execute(
                             text("""
                                 INSERT INTO note_attachments
@@ -274,55 +288,40 @@ def view_ticket(id):
                                 "file_type": file.mimetype
                             }
                         )
-            
+
                 session.commit()
-            
             session.close()
             return redirect(url_for("ticket.view_ticket", id=id))
 
         # ============================
         # UPDATE TICKET
         # ============================
-        status = request.form.get("status")
-        priority = request.form.get("priority")
-        assigned_to = request.form.get("assigned_to")
+        new_status = request.form.get("status")
+        new_priority = request.form.get("priority")
+        new_assigned = request.form.get("assigned_to")
 
-        old_assigned_to = ticket.assigned_to
         old_status = ticket.status
+        old_priority = ticket.priority
+        old_assigned = ticket.assigned_to
 
-        # ----------------------------
-        # ADMIN
-        # ----------------------------
         if current_user.role == "admin":
             session.execute(
                 text("""
                     UPDATE tickets
                     SET status = :status,
                         priority = :priority,
-                        assigned_to = :assigned_to,
+                        assigned_to = :assigned,
                         updated_at = NOW()
                     WHERE id = :id
                 """),
                 {
-                    "status": status,
-                    "priority": priority,
-                    "assigned_to": assigned_to if assigned_to else None,
+                    "status": new_status,
+                    "priority": new_priority,
+                    "assigned": new_assigned or None,
                     "id": id
                 }
             )
 
-            if assigned_to and str(old_assigned_to) != str(assigned_to):
-                notify_user(
-                    session,
-                    int(assigned_to),
-                    id,
-                    ticket.ticket_code,
-                    f"You have been assigned ticket {ticket.ticket_code}"
-                )
-
-        # ----------------------------
-        # AGENT
-        # ----------------------------
         elif current_user.role == "agent":
             if ticket.assigned_to != current_user.id:
                 session.close()
@@ -335,26 +334,57 @@ def view_ticket(id):
                         updated_at = NOW()
                     WHERE id = :id
                 """),
-                {
-                    "status": status,
-                    "id": id
-                }
+                {"status": new_status, "id": id}
             )
 
-        # Notify admins on status change
-        if status != old_status:
-            admins = session.execute(
-                text("SELECT id FROM users WHERE role = 'admin'")
-            ).fetchall()
+        # ============================
+        # 📝 ACTIVITY LOGS
+        # ============================
+        if new_status != old_status:
+            log_ticket_activity(
+                session,
+                id,
+                f"🔄 {current_user.email} changed status from {old_status} to {new_status}"
+            )
 
-            for admin in admins:
-                notify_user(
-                    session,
-                    admin.id,
-                    id,
-                    ticket.ticket_code,
-                    f"Ticket {ticket.ticket_code} status changed to {status}"
-                )
+        if current_user.role == "admin" and new_priority != old_priority:
+            log_ticket_activity(
+                session,
+                id,
+                f"⚡ {current_user.email} changed priority from {old_priority} to {new_priority}"
+            )
+
+        if str(new_assigned) != str(old_assigned):
+            log_ticket_activity(
+                session,
+                id,
+                f"👤 {current_user.email} reassigned this ticket"
+            )
+
+        # ============================
+        # 🔔 NOTIFICATIONS
+        # ============================
+        admins = session.execute(
+            text("SELECT id FROM users WHERE role = 'admin'")
+        ).fetchall()
+
+        for admin in admins:
+            notify_user(
+                session,
+                admin.id,
+                id,
+                ticket.ticket_code,
+                f"Ticket {ticket.ticket_code} updated"
+            )
+
+        if new_assigned:
+            notify_user(
+                session,
+                int(new_assigned),
+                id,
+                ticket.ticket_code,
+                f"You have been assigned ticket {ticket.ticket_code}"
+            )
 
         session.commit()
         session.close()
@@ -374,12 +404,7 @@ def view_ticket(id):
     # ============================
     notes = session.execute(
         text("""
-            SELECT 
-                n.id,
-                n.note,
-                n.created_at,
-                u.email,
-                u.role
+            SELECT n.id, n.note, n.created_at, u.email, u.role
             FROM ticket_notes n
             JOIN users u ON n.user_id = u.id
             WHERE n.ticket_id = :tid
@@ -399,7 +424,6 @@ def view_ticket(id):
         {"tid": id}
     ).fetchall()
 
-    # Group images by note
     images_by_note = {}
     for a in attachments:
         images_by_note.setdefault(a.note_id, []).append(a.file_path)
@@ -413,14 +437,3 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
-
-
-
-
-
-
-
-
-
-
-
