@@ -65,7 +65,16 @@
         <h2 style="color:#93c5fd;">{{ ticket.ticket_code }}</h2>
 
         <p><b>Email:</b> {{ ticket.email }}</p>
-        <p><b>Description:</b><br>{{ ticket.description }}</p>
+        <div class="ticket-description">
+            <span class="label">Description</span>
+        
+            <details class="email-collapse" open>
+                <summary>Email Content</summary>
+                <div class="email-body">
+                    {{ ticket.description | safe }}
+                </div>
+            </details>
+        </div>
 
         <p>
             <b>Status:</b>
@@ -190,6 +199,7 @@
 
 </body>
 </html>
+
 
 
 
