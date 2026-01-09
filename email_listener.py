@@ -6,6 +6,7 @@ from app import create_app
 import socket
 import re
 import time
+from app.utils.notifier import notify_user
 
 
 # ============================================================
@@ -126,9 +127,9 @@ def detect_priority(subject, body):
 # CREATE TICKET (SAFE + DEDUPLICATED)
 # ============================================================
 def create_ticket(session, sender, subject, body, message_id):
-    # ----------------------------
+    #-------------------------------
     # Prevent duplicate email
-    # ----------------------------
+    #-------------------------------
     exists = session.execute(
         text("SELECT id FROM tickets WHERE message_id = :mid LIMIT 1"),
         {"mid": message_id}
@@ -139,9 +140,9 @@ def create_ticket(session, sender, subject, body, message_id):
         return None
 
     try:
-        # ----------------------------
-        # Insert ticket FIRST
-        # ----------------------------
+        #-------------------------------
+        # Insert ticket
+        #-------------------------------
         result = session.execute(
             text("""
                 INSERT INTO tickets
@@ -160,9 +161,9 @@ def create_ticket(session, sender, subject, body, message_id):
         ticket_id = result.lastrowid
         ticket_code = f"TCK-{ticket_id:05d}"
 
-        # ----------------------------
-        # Update ticket_code safely
-        # ----------------------------
+        #-------------------------------
+        # Update ticket_code
+        #-------------------------------
         session.execute(
             text("""
                 UPDATE tickets
@@ -171,6 +172,24 @@ def create_ticket(session, sender, subject, body, message_id):
             """),
             {"code": ticket_code, "id": ticket_id}
         )
+
+        # 🔔 NOTIFY ADMINS + AGENTS
+        users = session.execute(
+            text("""
+                SELECT id
+                FROM users
+                WHERE role IN ('admin', 'agent')
+            """)
+        ).fetchall()
+
+        for user in users:
+            notify_user(
+                session,
+                user.id,
+                ticket_id,
+                ticket_code,
+                f"New ticket created: {ticket_code}"
+            )
 
         session.commit()
 
@@ -383,6 +402,7 @@ def idle_listener():
 # ============================================================
 if __name__ == "__main__":
     idle_listener()
+
 
 
 
