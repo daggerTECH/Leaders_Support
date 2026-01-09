@@ -8,6 +8,7 @@ import os
 from werkzeug.utils import secure_filename
 from app.utils.files import allowed_file
 from datetime import datetime, timedelta
+from app.utils.ticket_activity import log_ticket_activity
 
 ticket_bp = Blueprint("ticket", __name__)
 
@@ -437,3 +438,4 @@ def view_ticket(id):
         notes=notes,
         images_by_note=images_by_note
     )
+
