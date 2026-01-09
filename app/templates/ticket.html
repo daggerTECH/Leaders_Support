@@ -157,7 +157,7 @@
                             <div class="note-images">
                                 {% for img in images_by_note[n.id] %}
                                     <img
-                                        src="{{ url_for('static', filename='img.file_path') }}"
+                                        src="{{ url_for('static', filename=img.file_path) }}"
                                         class="note-image"
                                         loading="lazy"
                                     >
@@ -172,8 +172,25 @@
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="note-form" onsubmit="showLoader()">
-            <textarea name="note" placeholder="Write a note..." required></textarea>
-            <input type="file" name="images" multiple accept="image/*">
+            <div class="note-input-wrapper">
+                <textarea name="note" placeholder="Write a note..." required></textarea>
+            
+                <!-- Hidden file input -->
+                <input
+                    type="file"
+                    name="images"
+                    id="noteImages"
+                    multiple
+                    accept="image/*"
+                    hidden
+                >
+            
+                <!-- Attach icon -->
+                <label for="noteImages" class="attach-icon" title="Attach images">
+                    <img src="{{ url_for('static', filename='images/attached-file.png') }}">
+                </label>
+            </div>
+            
             <button class="btn-secondary" type="submit" onsubmit="showLoader()">Add Note</button>
         </form>
     </div>
@@ -199,6 +216,7 @@
 
 </body>
 </html>
+
 
 
 
